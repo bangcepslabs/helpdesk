@@ -1,218 +1,147 @@
-# Helpdesk 시스템
+# Helpdesk Service Desk
 
-IT 서비스 헬프데스크 시스템 - Spring Boot 기반 웹 애플리케이션
+IT 문의 접수와 운영 관리를 위한 사내 Helpdesk 웹 애플리케이션입니다. 일반 사용자는 문의를 등록하고 처리 현황을 확인할 수 있으며, 관리자는 게시판·회원·권한·메뉴·공통코드·팝업·통계를 통합 관리할 수 있습니다.
 
-## 📋 목차
-- [시스템 개요](#-시스템-개요)
-- [빠른 시작](#-빠른-시작)
-- [기능 목록](#-기능-목록)
-- [기술 스택](#-기술-스택)
-- [프로젝트 구조](#-프로젝트-구조)
-- [문서](#-문서)
+> 포트폴리오용 프로젝트 소개 문서
 
----
+## 프로젝트 개요
 
-## 🎯 시스템 개요
+| 항목 | 내용 |
+| --- | --- |
+| 프로젝트 | Helpdesk Service Desk |
+| 유형 | 사내 IT 문의 관리 시스템 |
+| Backend | Spring Boot 2.7, Java 8, MyBatis |
+| Frontend | JSP, JSTL, JavaScript, jQuery, CSS |
+| Database | Microsoft SQL Server |
+| Build | Maven, WAR 패키징 |
+| 인증 | 세션 기반 로그인 및 권한 제어 |
 
-### 주요 기능
-- **게시판 관리**: 다양한 유형의 게시판 생성 및 관리
-- **문의 관리**: IT 문의사항 등록, 처리, 추적
-- **회원 관리**: 사용자 및 권한 관리
-- **통계**: 접속 통계, 게시물 통계
-- **공통코드 관리**: 시스템 코드 관리
+## 주요 기능
 
-### 사용자 유형
-- **시스템관리자** (role_code: 1): 전체 시스템 관리
-- **관리자** (role_code: 2): 게시판 및 문의 관리
-- **일반사용자** (role_code: 3): 문의 등록 및 조회
+### 사용자 영역
 
----
+- 로그인·로그아웃 및 비밀번호 변경
+- 문의 게시판 조회·등록·수정·삭제
+- 문의 상태 및 처리 이력 확인
+- 관리자 답변 조회
+- 첨부파일 업로드·다운로드
+- FAQ 및 공지사항 조회
+- 사용자 프로필 조회
 
-## 🚀 빠른 시작
+### 관리자 영역
 
-### 1. 사전 요구사항
-- **JDK**: 11 이상
-- **Maven**: 3.6 이상
-- **SQL Server**: 2019 이상 (Express Edition 가능)
+- 운영 대시보드 및 접속 통계
+- 게시판·게시판 필드 관리
+- 문의 접수·처리·완료 상태 관리
+- 회원 승인·수정·비밀번호 초기화
+- 역할별 메뉴 권한 관리
+- 메뉴 정렬 및 접근 권한 설정
+- 공통코드 그룹·상세코드 관리
+- 팝업 및 시스템 설정 관리
 
-### 2. 데이터베이스 설정
+## 핵심 구현 포인트
 
-SQL Server Management Studio 또는 sqlcmd로 실행:
-```bash
-sqlcmd -S "localhost\SQLEXPRESS" -U sa -P [sa비밀번호] -i SETUP_DATABASE.sql
+- **역할 기반 접근 제어**: 관리자와 일반 사용자의 메뉴·URL 접근을 분리했습니다.
+- **업무 상태 관리**: 문의 상태를 Waiting, Received, Processing, Completed, Hold로 관리합니다.
+- **관리자 기능 모듈화**: 게시판, 회원, 역할, 메뉴, 공통코드, 팝업, 통계를 기능별 Controller-Service-Mapper 구조로 분리했습니다.
+- **MyBatis 매핑 분리**: 도메인별 Mapper 인터페이스와 XML SQL을 분리해 유지보수성을 높였습니다.
+- **파일 처리**: 허용 확장자와 최대 용량을 설정으로 관리하고 문의 첨부파일 업로드·다운로드를 지원합니다.
+- **공통 처리**: 로그인 인터셉터, 세션 유틸리티, 페이징 유틸리티를 공통 모듈로 구성했습니다.
+
+## 화면 미리보기
+
+실행 화면을 기준으로 사용자와 관리자 업무 흐름을 확인할 수 있도록 구성했습니다.
+
+### 로그인
+
+![Helpdesk 로그인 화면](docs/images/login.png)
+
+### 문의 상세
+
+![문의 상세 화면](docs/images/post-detail.png)
+
+문의 상태, 작성자, 등록일, 조회수, 답변 작성 영역을 제공하며 관리자는 상태 변경과 답변 등록을 수행할 수 있습니다.
+
+### 관리자 대시보드
+
+![관리자 대시보드](docs/images/admin-dashboard.png)
+
+전체 사용자·문의·처리 상태를 요약하고 시스템 관리, 메뉴·권한·코드 관리, 회원·게시판·팝업 관리, 통계 기능으로 연결합니다.
+
+사용자 메인과 관리자 기능 메뉴 화면은 추가 캡처 후 같은 섹션에 확장할 수 있습니다.
+
+## 프로젝트 구조
+
+```text
+src/main/java/com/helpdesk
+├─ admin
+│  ├─ board       게시판 관리
+│  ├─ code        공통코드 관리
+│  ├─ main        관리자 메인
+│  ├─ member      회원 관리
+│  ├─ menu        메뉴 관리
+│  ├─ popup       팝업 관리
+│  ├─ role        역할·권한 관리
+│  ├─ stats       통계
+│  └─ system      시스템 설정
+├─ user
+│  ├─ auth        로그인·인증
+│  ├─ faq         FAQ
+│  ├─ main        사용자 메인
+│  ├─ post        문의 게시판
+│  └─ profile     프로필
+└─ common
+   ├─ config      웹·파일 설정
+   ├─ controller  공통 컨트롤러
+   ├─ interceptor 로그인 인터셉터
+   └─ util        세션·비밀번호·페이징 유틸리티
 ```
 
-**생성되는 항목**:
-- 데이터베이스: `helpdesk`
-- 관리자 계정: `admin` / `admin1234`
-- 테스트 계정: `user01` / `user1234`
-- 기본 게시판: IT 문의게시판
+## 실행 방법
 
-### 3. 애플리케이션 설정
+### 사전 요구사항
 
-`src/main/resources/application.yml` 확인:
-```yaml
-spring:
-  datasource:
-    url: jdbc:sqlserver://localhost\\SQLEXPRESS;databaseName=helpdesk;encrypt=false
-    username: appUser
-    password: xlqm4968632@
-```
+- JDK 8 이상
+- Maven 3.6 이상
+- Microsoft SQL Server 2019 이상
 
-### 4. 프로젝트 실행
+### 데이터베이스 초기화
+
+`SETUP_DATABASE.sql`을 SQL Server에서 실행해 데이터베이스와 테이블을 생성합니다.
 
 ```bash
-# Maven으로 실행
-mvn clean spring-boot:run
+sqlcmd -S "localhost\\SQLEXPRESS" -U sa -P "<sa-password>" -i SETUP_DATABASE.sql
+```
 
-# 또는 JAR 빌드 후 실행
+### 애플리케이션 설정
+
+`src/main/resources/application.yml`에서 로컬 DB 접속 정보와 파일 업로드 경로를 환경에 맞게 설정합니다. 비밀번호와 내부 경로는 공개 저장소에 실제 값을 커밋하지 않는 것을 권장합니다.
+
+### 빌드 및 실행
+
+```bash
 mvn clean package
-java -jar target/helpdesk-1.0.0.jar
+java -jar target/helpdesk-1.0.0.war
 ```
 
-### 5. 접속
+브라우저에서 [http://localhost:8080](http://localhost:8080)에 접속합니다.
 
-브라우저에서 **http://localhost:8080** 접속
+## 테스트 계정
 
-**로그인**:
-- 관리자: `admin` / `admin1234`
-- 일반사용자: `user01` / `user1234`
+초기화 SQL에 포함된 테스트 계정은 로컬 개발 환경에서만 사용합니다. 공개 저장소에는 운영 계정 및 실제 비밀번호를 포함하지 않습니다.
 
----
+## 관련 문서
 
-## ✨ 기능 목록
+- [실행 가이드](RUN_GUIDE.md)
+- [데이터베이스 스키마 정보](docs/DATABASE_SCHEMA_INFO.md)
+- [게시판 등록 테스트 가이드](docs/BOARD_REGISTRATION_TEST_GUIDE.md)
+- [사용자 게시글 목록 수정 기록](docs/USER_POST_LIST_FIX.md)
+- [관리자 통계 연도 필터](docs/MAIN_STATS_YEAR_FILTER.md)
 
-### 사용자 기능
-- ✅ 로그인/로그아웃
-- ✅ 비밀번호 변경
-- ✅ 문의 등록/조회/수정
-- ✅ 나의 문의 현황 확인 (연도별)
-- ✅ 공지사항 조회
-- ✅ 파일 첨부/다운로드
+## 빌드 검증
 
-### 관리자 기능
-- ✅ 게시판 관리 (생성/수정/삭제)
-- ✅ 문의 처리 (접수/처리중/완료)
-- ✅ 회원 관리 (승인/권한 부여)
-- ✅ 공통코드 관리
-- ✅ 접속 통계 조회
-- ✅ 권한 관리
+2026-09-18 기준 `mvn -DskipTests package` 실행 결과 WAR 패키징에 성공했습니다.
 
----
+## License
 
-## 🛠 기술 스택
-
-### Backend
-- **Framework**: Spring Boot 2.7.x
-- **ORM**: MyBatis 2.3.x
-- **Database**: SQL Server 2019
-- **Build Tool**: Maven 3.8.x
-- **Java**: 11
-
-### Frontend
-- **Template Engine**: JSP
-- **CSS**: Custom CSS
-- **JavaScript**: jQuery 3.6.x
-
----
-
-## 📁 프로젝트 구조
-
-```
-helpdesk/
-├── src/
-│   ├── main/
-│   │   ├── java/com/helpdesk/
-│   │   │   ├── admin/              # 관리자 기능
-│   │   │   │   ├── board/          # 게시판 관리
-│   │   │   │   ├── member/         # 회원 관리
-│   │   │   │   ├── code/           # 공통코드 관리
-│   │   │   │   ├── stats/          # 통계
-│   │   │   │   └── role/           # 권한 관리
-│   │   │   ├── user/               # 사용자 기능
-│   │   │   │   ├── main/           # 메인 페이지
-│   │   │   │   └── post/           # 게시물 관리
-│   │   │   ├── common/             # 공통 기능
-│   │   │   │   ├── config/         # 설정
-│   │   │   │   ├── interceptor/    # 인터셉터
-│   │   │   │   └── util/           # 유틸리티
-│   │   │   └── auth/               # 인증
-│   │   ├── resources/
-│   │   │   ├── mapper/             # MyBatis 매퍼
-│   │   │   ├── sql/                # SQL 스크립트
-│   │   │   ├── static/             # 정적 리소스
-│   │   │   └── application.yml     # 설정 파일
-│   │   └── webapp/WEB-INF/views/   # JSP 파일
-│   └── test/                       # 테스트 코드
-├── docs/                           # 상세 문서
-├── SETUP_DATABASE.sql              # DB 초기화 스크립트
-├── README.md                       # 이 파일
-├── RUN_GUIDE.md                    # 실행 가이드
-├── FIXES_AND_IMPROVEMENTS.md       # 수정 사항
-└── pom.xml                         # Maven 설정
-```
-
----
-
-## 📚 문서
-
-### 필수 문서
-- **README.md** (이 파일): 프로젝트 개요 및 빠른 시작
-- **RUN_GUIDE.md**: 상세 실행 가이드
-- **SETUP_DATABASE.sql**: 데이터베이스 초기화 스크립트
-- **FIXES_AND_IMPROVEMENTS.md**: 수정 및 개선 사항
-
-### 상세 문서 (docs/ 폴더)
-- 게시판 관련: `BOARD_*.md`
-- 회원 관리: `MEMBER_*.md`
-- 공통코드: `CODE_*.md`
-- 사용자 기능: `USER_*.md`
-- 기타: `DATABASE_SCHEMA_INFO.md`, `TOMCAT_CLEANUP.md`
-
----
-
-## 🔑 주요 계정 정보
-
-### 데이터베이스
-- **DB명**: helpdesk
-- **인스턴스**: localhost\SQLEXPRESS
-- **계정**: appUser / xlqm4968632@
-
-### 애플리케이션
-- **관리자**: admin / admin1234 (role_code: 1)
-- **일반사용자**: user01 / user1234 (role_code: 3)
-
----
-
-## 📊 게시물 상태 코드
-- **W**: 대기 (Waiting)
-- **R**: 접수 (Received)
-- **P**: 처리중 (Processing)
-- **C**: 완료 (Completed)
-- **H**: 보류 (Hold)
-
----
-
-## 🔧 문제 해결
-
-### 데이터베이스 연결 오류
-1. SQL Server 서비스 실행 확인
-2. `application.yml`의 연결 정보 확인
-3. `SETUP_DATABASE.sql` 재실행
-
-### 로그인 실패
-1. 데이터베이스에 사용자 데이터 확인
-2. 비밀번호 해시 확인 (SHA-256)
-3. 세션 설정 확인
-
-### Tomcat 포트 충돌
-```bash
-# cleanup-tomcat.ps1 실행
-.\cleanup-tomcat.ps1
-```
-
----
-
-## 📝 라이선스
-
-이 프로젝트는 내부 사용을 위한 프로젝트입니다.
+This project is for portfolio and educational purposes.

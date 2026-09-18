@@ -137,9 +137,9 @@
         </form>
 
         <div class="login-info">
-            <strong>테스트 계정</strong>
-            관리자: admin / admin1234<br>
-            사용자: user01 / user1234
+            <strong>안내</strong>
+            사내 IT 문의 접수 및 처리 현황을 관리하는 Helpdesk입니다.<br>
+            계정 문의는 시스템 관리자에게 연락해 주세요.
         </div>
     </div>
 </div>
