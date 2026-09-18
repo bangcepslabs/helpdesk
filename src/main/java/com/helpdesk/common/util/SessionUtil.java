@@ -29,19 +29,25 @@ public class SessionUtil {
     public static String getLoginUserId(HttpServletRequest request) {
         Map<String, Object> user = getLoginUser(request);
         if (user == null) return null;
-        return (String) user.get("userId");
+        Object value = user.get("userId");
+        if (value == null) value = user.get("user_id");
+        return value != null ? String.valueOf(value) : null;
     }
 
     public static String getLoginUserName(HttpServletRequest request) {
         Map<String, Object> user = getLoginUser(request);
         if (user == null) return null;
-        return (String) user.get("userNm");
+        Object value = user.get("userNm");
+        if (value == null) value = user.get("user_nm");
+        return value != null ? String.valueOf(value) : null;
     }
 
     public static String getLoginSysId(HttpServletRequest request) {
         Map<String, Object> user = getLoginUser(request);
         if (user == null) return null;
-        return (String) user.get("sysId");
+        Object value = user.get("sysId");
+        if (value == null) value = user.get("sys_id");
+        return value != null ? String.valueOf(value) : null;
     }
 
     public static boolean isLoggedIn(HttpServletRequest request) {

@@ -96,12 +96,19 @@ public class PostController {
                        HttpServletRequest request, Model model) {
 
         Map<String, Object> loginUser = SessionUtil.getLoginUser(request);
+        if (loginUser == null) {
+            return "redirect:/auth/login";
+        }
         
         // 조회수 증가
         postService.increaseReadCount(boardId, postSeq);
         
         // 게시물 정보
         Map<String, Object> postInfo = postService.getPostInfo(boardId, postSeq);
+        if (postInfo == null) {
+            model.addAttribute("errorMsg", "존재하지 않는 게시글입니다.");
+            return "common/error";
+        }
         
         // 권한 체크
         String ownerUserId = (String) postInfo.get("reg_id");
@@ -244,10 +251,36 @@ public class PostController {
     @PostMapping("/update")
     public String update(@RequestParam Map<String, Object> param,
                          @RequestParam(required = false) List<MultipartFile> files,
-                         @RequestParam(required = false) List<Integer> deleteFileSeqs) {
-        
-        postService.updatePost(param, files, deleteFileSeqs);
-        return "redirect:/user/post/view?boardId=" + param.get("boardId") + "&postSeq=" + param.get("postSeq");
+                         @RequestParam(required = false) List<Integer> deleteFileSeqs,
+                         HttpServletRequest request, Model model) {
+        try {
+            Map<String, Object> loginUser = SessionUtil.getLoginUser(request);
+            if (loginUser == null) return "redirect:/auth/login";
+
+            int boardId = Integer.parseInt(String.valueOf(param.get("boardId")));
+            int postSeq = Integer.parseInt(String.valueOf(param.get("postSeq")));
+            Map<String, Object> postInfo = postService.getPostInfo(boardId, postSeq);
+            if (postInfo == null) {
+                model.addAttribute("errorMsg", "존재하지 않는 게시글입니다.");
+                return "common/error";
+            }
+
+            String ownerUserId = String.valueOf(postInfo.get("reg_id"));
+            String currentUserId = SessionUtil.getLoginUserId(request);
+            Object roleCode = loginUser.get("roleCode");
+            if (roleCode == null) roleCode = loginUser.get("role_code");
+            boolean isAdmin = roleCode != null && Integer.parseInt(String.valueOf(roleCode)) <= 2;
+            if (!isAdmin && !ownerUserId.equals(currentUserId)) {
+                model.addAttribute("errorMsg", "수정 권한이 없습니다.");
+                return "common/error";
+            }
+
+            postService.updatePost(param, files, deleteFileSeqs);
+            return "redirect:/user/post/view?boardId=" + boardId + "&postSeq=" + postSeq;
+        } catch (Exception e) {
+            model.addAttribute("errorMsg", "게시글 수정 중 오류가 발생했습니다.");
+            return "common/error";
+        }
     }
 
     /** 게시물 삭제 (Ajax) */

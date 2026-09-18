@@ -2,6 +2,7 @@ package com.helpdesk.common.controller;
 
 import com.helpdesk.common.util.SessionUtil;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +27,12 @@ public class RootController {
      */
     @GetMapping("/error")
     public String error() {
+        return "common/error";
+    }
+
+    @GetMapping("/error/403")
+    public String forbidden(Model model) {
+        model.addAttribute("errorMsg", "접근 권한이 없습니다.");
         return "common/error";
     }
 }

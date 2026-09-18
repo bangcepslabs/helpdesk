@@ -22,7 +22,7 @@ public class MainController {
     @GetMapping("")
     public String main(HttpServletRequest request, Model model) {
         Map<String, Object> loginUser = SessionUtil.getLoginUser(request);
-        String userId = (String) loginUser.get("userId");
+        String userId = SessionUtil.getLoginUserId(request);
         
         // 나의 요청 현황 (실제 DB 조회)
         Map<String, Object> myStats = mainService.getMyStats(userId);
