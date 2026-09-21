@@ -10,8 +10,8 @@ server:
 spring:
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=helpdesk;encrypt=false;trustServerCertificate=true;characterEncoding=UTF-8;sendStringParametersAsUnicode=true;
-    username: appUser
-    password: xlqm4968632@
+    username: ${HELPDESK_DB_USERNAME:appUser}
+    password: ${HELPDESK_DB_PASSWORD}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     hikari:
       maximum-pool-size: 10
@@ -48,7 +48,7 @@ mybatis:
 
 # 파일 업로드 경로
 file:
-  upload-path: D:/helpdesk/upload
+  upload-path: ${HELPDESK_UPLOAD_PATH:${java.io.tmpdir}/helpdesk-upload}
   allowed-ext: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,hwp,txt,zip
   max-size: 1000000000
 
@@ -60,7 +60,7 @@ system:
 
 logging:
   level:
-    com.helpdesk: DEBUG
-    org.mybatis: DEBUG
+    com.helpdesk: INFO
+    org.mybatis: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

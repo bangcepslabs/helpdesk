@@ -56,3 +56,5 @@ logs/
 # Application specific
 /upload/
 /temp/
+.env
+*.env.local

@@ -73,15 +73,7 @@ http://localhost:8080/auth/login
 
 ### 계정 정보
 
-#### 관리자 계정
-- **ID**: `admin`
-- **PW**: `admin1234`
-- **권한**: 시스템관리자 (모든 기능 접근 가능)
-
-#### 테스트 사용자 계정
-- **ID**: `user01`
-- **PW**: `user1234`
-- **권한**: 일반사용자
+초기화 SQL의 계정은 로컬 개발·테스트용입니다. 실제 비밀번호는 저장소에 기록하지 말고 실행 환경에서 관리하세요.
 
 ## 📋 주요 기능 URL
 
@@ -105,7 +97,7 @@ http://localhost:8080/auth/login
 
 - **서버**: `localhost\SQLEXPRESS`
 - **데이터베이스**: `helpdesk`
-- **계정**: `appUser` / `xlqm4968632@`
+- **계정**: 환경변수 `HELPDESK_DB_USERNAME` / `HELPDESK_DB_PASSWORD`
 - **포트**: 기본 포트 (1433)
 
 ## 📝 초기 데이터

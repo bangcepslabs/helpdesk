@@ -115,7 +115,13 @@ sqlcmd -S "localhost\\SQLEXPRESS" -U sa -P "<sa-password>" -i SETUP_DATABASE.sql
 
 ### 애플리케이션 설정
 
-`src/main/resources/application.yml`에서 로컬 DB 접속 정보와 파일 업로드 경로를 환경에 맞게 설정합니다. 비밀번호와 내부 경로는 공개 저장소에 실제 값을 커밋하지 않는 것을 권장합니다.
+실행 전에 환경변수를 설정합니다. 비밀번호와 내부 경로는 소스에 직접 커밋하지 않습니다.
+
+```powershell
+$env:HELPDESK_DB_USERNAME = "appUser"
+$env:HELPDESK_DB_PASSWORD = "<db-password>"
+$env:HELPDESK_UPLOAD_PATH = "C:\helpdesk\upload"
+```
 
 ### 빌드 및 실행
 
