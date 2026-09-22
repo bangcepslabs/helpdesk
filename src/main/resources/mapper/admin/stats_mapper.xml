@@ -261,15 +261,16 @@
     <!-- 게시물 상태별 통계 -->
     <select id="selectPostStatusStats" parameterType="map" resultType="map">
         SELECT
-            COUNT(CASE WHEN board_status = 'W' THEN 1 END) AS wait_cnt,
-            COUNT(CASE WHEN board_status = 'R' THEN 1 END) AS proc_cnt,
-            COUNT(CASE WHEN board_status = 'C' THEN 1 END) AS comp_cnt,
-            COUNT(CASE WHEN board_status = 'H' THEN 1 END) AS hold_cnt,
+            COUNT(CASE WHEN P.post_status = 'W' THEN 1 END) AS wait_cnt,
+            COUNT(CASE WHEN P.post_status = 'P' THEN 1 END) AS proc_cnt,
+            COUNT(CASE WHEN P.post_status = 'C' THEN 1 END) AS comp_cnt,
+            COUNT(CASE WHEN P.post_status = 'H' THEN 1 END) AS hold_cnt,
             COUNT(*) AS total_cnt
-        FROM TB_BOARD_INFO
-        WHERE 1=1
+        FROM TB_POST_INFO P
+        JOIN TB_BOARD_INFO B ON B.board_id = P.board_id
+        WHERE P.post_use_yn = 'Y'
         <if test="sysId != null and sysId != ''">
-            AND sys_id = #{sysId}
+            AND B.sys_id = #{sysId}
         </if>
     </select>
 

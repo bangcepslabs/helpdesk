@@ -1,7 +1,7 @@
 package com.helpdesk.user.profile.controller;
 
 import com.helpdesk.common.util.SessionUtil;
-import com.helpdesk.common.util.PasswordUtil;
+import com.helpdesk.user.auth.service.LoginService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,17 +14,17 @@ import java.util.Map;
 @RequestMapping("/user/profile")
 public class ProfileController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private LoginService loginService;
+
     /** 프로필 페이지 */
     @GetMapping("")
     public String profile(HttpServletRequest request, Model model) {
         Map<String, Object> loginUser = SessionUtil.getLoginUser(request);
         
-        // 사용자 통계 정보 (임시 데이터)
-        Map<String, Object> userStats = new HashMap<>();
-        userStats.put("totalPosts", 15);
-        userStats.put("resolvedPosts", 12);
-        userStats.put("totalFiles", 8);
-        userStats.put("loginCount", 45);
+        if (loginUser == null) return "redirect:/auth/login";
+        String userId = SessionUtil.getLoginUserId(request);
+        Map<String, Object> userStats = loginService.getProfileStats(userId);
         
         model.addAttribute("userStats", userStats);
         model.addAttribute("pageTitle", "내 정보 관리");
@@ -43,8 +43,17 @@ public class ProfileController {
         Map<String, Object> loginUser = SessionUtil.getLoginUser(request);
         
         try {
-            // 현재 비밀번호 확인 (실제 구현에서는 DB에서 확인)
-            String currentPasswordHash = PasswordUtil.encrypt(currentPassword);
+            if (loginUser == null) {
+                result.put("success", false);
+                result.put("message", "로그인이 필요합니다.");
+                return result;
+            }
+            String userId = SessionUtil.getLoginUserId(request);
+            if (!loginService.isPasswordValid(userId, currentPassword)) {
+                result.put("success", false);
+                result.put("message", "현재 비밀번호가 올바르지 않습니다.");
+                return result;
+            }
             
             // 새 비밀번호 유효성 검사
             if (newPassword.length() < 8) {
@@ -60,11 +69,11 @@ public class ProfileController {
                 return result;
             }
             
-            // 새 비밀번호 해시화
-            String newPasswordHash = PasswordUtil.encrypt(newPassword);
-            
-            // 실제 구현에서는 여기서 DB 업데이트
-            // userService.updatePassword(loginUser.get("userId"), newPasswordHash);
+            if (loginService.changePassword(userId, newPassword) <= 0) {
+                result.put("success", false);
+                result.put("message", "비밀번호 변경 대상 사용자를 찾을 수 없습니다.");
+                return result;
+            }
             
             result.put("success", true);
             result.put("message", "비밀번호가 성공적으로 변경되었습니다.");

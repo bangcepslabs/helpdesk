@@ -48,6 +48,19 @@ public class LoginService {
         return userInfo;
     }
 
+    public boolean isPasswordValid(String userId, String rawPwd) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("userId", userId);
+        param.put("userPwd", PasswordUtil.encrypt(rawPwd));
+        return loginMapper.selectUserBaseInfo(param) != null;
+    }
+
+    public Map<String, Object> getProfileStats(String userId) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("userId", userId);
+        return loginMapper.selectProfileStats(param);
+    }
+
     /**
      * 비밀번호 변경 주기 초과 여부
      */

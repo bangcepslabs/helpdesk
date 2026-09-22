@@ -28,8 +28,8 @@ public class AdminMainService {
         // 대기중 문의 (W:대기)
         stats.put("waitingPosts", adminMainMapper.selectPostCountByStatus("W"));
         
-        // 처리중 문의 (R:접수)
-        stats.put("processingPosts", adminMainMapper.selectPostCountByStatus("R"));
+        // 처리중 문의 (P:처리중)
+        stats.put("processingPosts", adminMainMapper.selectPostCountByStatus("P"));
         
         // 완료 문의 (C:완료)
         stats.put("completedPosts", adminMainMapper.selectPostCountByStatus("C"));

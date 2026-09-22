@@ -30,6 +30,27 @@
         ORDER BY sort_order, menu_id
     </select>
 
+    <select id="selectMenuLevelList" parameterType="map" resultType="map">
+        SELECT menu_id, menu_nm, menu_level, upper_menu_id, sort_order
+        FROM TB_MENU_INFO WHERE sys_id = #{sysId} AND use_yn = 'Y'
+        ORDER BY menu_level, sort_order, menu_id
+    </select>
+
+    <select id="selectChildMenuIdList" parameterType="map" resultType="string">
+        SELECT CAST(menu_id AS VARCHAR) FROM TB_MENU_INFO
+        WHERE upper_menu_id = #{upperMenuId} AND use_yn = 'Y'
+    </select>
+
+    <update id="deleteMenuByUpperId" parameterType="map">
+        UPDATE TB_MENU_INFO SET use_yn = 'N' WHERE menu_id = #{upperMenuId}
+    </update>
+
+    <select id="selectBoardPathList" parameterType="map" resultType="map">
+        SELECT board_id, board_title, sys_id FROM TB_BOARD_INFO
+        WHERE board_use_yn = 'Y' AND sys_id = #{sysId}
+        ORDER BY board_title
+    </select>
+
     <!-- 메뉴 상세 조회 -->
     <select id="selectMenuInfo" parameterType="map" resultType="map">
         SELECT * FROM TB_MENU_INFO WHERE menu_id = #{menuId}
@@ -130,12 +151,12 @@
     </select>
 
     <!-- 메뉴 권한 삭제 -->
-    <delete id="deleteMenuRoleMap" parameterType="map">
+    <delete id="deleteMenuRole" parameterType="map">
         DELETE FROM TB_MENU_ROLE_MAP WHERE menu_id = #{menuId}
     </delete>
 
     <!-- 메뉴 권한 등록 -->
-    <insert id="insertMenuRoleMap" parameterType="map">
+    <insert id="insertMenuRole" parameterType="map">
         INSERT INTO TB_MENU_ROLE_MAP (
             menu_id, role_no, role_type, menu_type, content_id
         ) VALUES (

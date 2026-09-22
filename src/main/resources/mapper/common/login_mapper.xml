@@ -31,6 +31,14 @@
           AND user_pwd = #{userPwd}
     </select>
 
+    <select id="selectProfileStats" parameterType="map" resultType="map">
+        SELECT
+            (SELECT COUNT(*) FROM TB_POST_INFO WHERE reg_id = #{userId} AND post_use_yn = 'Y') AS totalPosts,
+            (SELECT COUNT(*) FROM TB_POST_INFO WHERE reg_id = #{userId} AND post_use_yn = 'Y' AND post_status = 'C') AS resolvedPosts,
+            (SELECT COUNT(*) FROM TB_POST_FILE_INFO F JOIN TB_POST_INFO P ON P.post_seq = F.post_seq AND P.board_id = F.board_id WHERE P.reg_id = #{userId} AND P.post_use_yn = 'Y') AS totalFiles,
+            (SELECT COUNT(*) FROM TB_USER_ACCESS_LOG WHERE user_id = #{userId}) AS loginCount
+    </select>
+
     <!-- 비밀번호 변경 주기 확인 -->
     <select id="selectPwdChangeInfo" parameterType="map" resultType="map">
         SELECT COUNT(*) AS change_cnt

@@ -12,6 +12,9 @@ public interface LoginMapper {
     /** 사용자 기본 정보 조회 (ID만으로) */
     Map<String, Object> selectUserBaseInfo(Map<String, Object> param);
 
+    /** 프로필 통계 */
+    Map<String, Object> selectProfileStats(Map<String, Object> param);
+
     /** 비밀번호 변경 주기 확인 */
     Map<String, Object> selectPwdChangeInfo(Map<String, Object> param);
 
