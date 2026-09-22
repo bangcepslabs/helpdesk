@@ -291,14 +291,22 @@ public class PostController {
                                       HttpServletRequest request) {
         
         Map<String, Object> loginUser = SessionUtil.getLoginUser(request);
-        Map<String, Object> postInfo = postService.getPostInfo(boardId, postSeq);
-        
         Map<String, Object> result = new HashMap<>();
+        if (loginUser == null) {
+            result.put("success", false);
+            result.put("message", "로그인이 필요합니다.");
+            return result;
+        }
+        Map<String, Object> postInfo = postService.getPostInfo(boardId, postSeq);
+        if (postInfo == null) {
+            result.put("success", false);
+            result.put("message", "존재하지 않는 게시글입니다.");
+            return result;
+        }
         
         // 권한 체크
         String ownerUserId = (String) postInfo.get("reg_id");
-        String currentUserId = (String) loginUser.get("user_id");
-        if (currentUserId == null) currentUserId = (String) loginUser.get("userId");
+        String currentUserId = SessionUtil.getLoginUserId(request);
         
         boolean isOwner = ownerUserId != null && ownerUserId.equals(currentUserId);
         Object roleCodeObj = loginUser.get("roleCode");
@@ -321,11 +329,20 @@ public class PostController {
     @ResponseBody
     public Map<String, Object> updateStatus(@RequestParam int boardId,
                                             @RequestParam int postSeq,
-                                            @RequestParam String postStatus) {
-        
-        postService.updatePostStatus(boardId, postSeq, postStatus);
-        
+                                            @RequestParam String postStatus,
+                                            HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
+        if (!isAdmin(SessionUtil.getLoginUser(request))) {
+            result.put("success", false);
+            result.put("message", "관리자만 상태를 변경할 수 있습니다.");
+            return result;
+        }
+        if (postService.getPostInfo(boardId, postSeq) == null) {
+            result.put("success", false);
+            result.put("message", "존재하지 않는 게시글입니다.");
+            return result;
+        }
+        postService.updatePostStatus(boardId, postSeq, postStatus);
         result.put("success", true);
         return result;
     }
@@ -337,20 +354,22 @@ public class PostController {
                                            HttpServletRequest request) {
         
         Map<String, Object> loginUser = SessionUtil.getLoginUser(request);
+        Map<String, Object> result = new HashMap<>();
+        if (!isAdmin(loginUser)) {
+            result.put("success", false);
+            result.put("message", "관리자만 답변을 등록할 수 있습니다.");
+            return result;
+        }
         
         // 사용자 정보 설정 (다양한 키 이름 지원)
-        String userId = (String) loginUser.get("user_id");
-        if (userId == null) userId = (String) loginUser.get("userId");
-        String userNm = (String) loginUser.get("user_nm");
-        if (userNm == null) userNm = (String) loginUser.get("userNm");
+        String userId = SessionUtil.getLoginUserId(request);
+        String userNm = SessionUtil.getLoginUserName(request);
         
         param.put("regId", userId);
         param.put("regNm", userNm);
         param.put("regIp", request.getRemoteAddr());
         
         postService.insertReply(param);
-        
-        Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         return result;
     }
@@ -358,10 +377,15 @@ public class PostController {
     /** 답변 수정 (Ajax) */
     @PostMapping("/reply/update")
     @ResponseBody
-    public Map<String, Object> updateReply(@RequestParam Map<String, Object> param) {
-        postService.updateReply(param);
-        
+    public Map<String, Object> updateReply(@RequestParam Map<String, Object> param,
+                                           HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
+        if (!isAdmin(SessionUtil.getLoginUser(request))) {
+            result.put("success", false);
+            result.put("message", "관리자만 답변을 수정할 수 있습니다.");
+            return result;
+        }
+        postService.updateReply(param);
         result.put("success", true);
         return result;
     }
@@ -370,13 +394,29 @@ public class PostController {
     @PostMapping("/reply/delete")
     @ResponseBody
     public Map<String, Object> deleteReply(@RequestParam int boardId,
-                                           @RequestParam int replySeq) {
+                                           @RequestParam int replySeq,
+                                           HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        if (!isAdmin(SessionUtil.getLoginUser(request))) {
+            result.put("success", false);
+            result.put("message", "관리자만 답변을 삭제할 수 있습니다.");
+            return result;
+        }
         
         postService.deleteReply(boardId, replySeq);
-        
-        Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         return result;
+    }
+
+    private boolean isAdmin(Map<String, Object> loginUser) {
+        if (loginUser == null) return false;
+        Object roleCode = loginUser.get("roleCode");
+        if (roleCode == null) roleCode = loginUser.get("role_code");
+        try {
+            return roleCode != null && Integer.parseInt(String.valueOf(roleCode)) <= 2;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     /** 파일 다운로드 */
