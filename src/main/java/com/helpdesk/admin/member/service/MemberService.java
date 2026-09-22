@@ -95,6 +95,10 @@ public class MemberService {
         Map<String, Object> param = new HashMap<>();
         param.put("userId", userId);
         param.put("userPwd", PasswordUtil.encrypt(newRawPwd));
+        param.put("histType", "ADMIN_RESET");
+        param.put("regId", userId);
+        param.put("regNm", "관리자");
+        memberMapper.insertPasswordHistory(param);
         memberMapper.updateMemberPwd(param);
     }
 

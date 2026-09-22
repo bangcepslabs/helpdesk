@@ -244,8 +244,10 @@
 
     <!-- 파일 상세 -->
     <select id="selectFileInfo" parameterType="map" resultType="map">
-        SELECT * FROM TB_POST_FILE_INFO
-        WHERE file_seq = #{fileSeq}
+        SELECT F.*, P.reg_id, P.secret_yn, P.post_use_yn
+        FROM TB_POST_FILE_INFO F
+        JOIN TB_POST_INFO P ON P.board_id = F.board_id AND P.post_seq = F.post_seq
+        WHERE F.file_seq = #{fileSeq}
     </select>
 
     <!-- 파일 등록 -->

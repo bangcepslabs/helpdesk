@@ -58,11 +58,14 @@
         FROM TB_ROLE_INFO R
         JOIN TB_USER_ROLE_MAP RM ON R.role_code = RM.role_code AND R.sys_id = RM.sys_id
         WHERE RM.user_id = #{userId}
+          AND RM.sys_id = #{sysId}
     </select>
 
     <!-- 승인 대기 회원 수 -->
     <select id="selectPendingApprovalCount" parameterType="map" resultType="map">
-        SELECT 0 AS pending_cnt
+        SELECT COUNT(*) AS pending_cnt
+        FROM TB_USER_TYPE_INFO
+        WHERE approval_yn = 'N'
     </select>
 
     <!-- 비밀번호 변경 -->
@@ -71,5 +74,11 @@
         SET user_pwd = #{newPwd}
         WHERE user_id = #{userId}
     </update>
+
+    <insert id="insertPasswordHistory" parameterType="map">
+        INSERT INTO TB_USER_PWD_HIST (hist_type, user_id, prev_pwd, reg_id, reg_nm, reg_ip, reg_dt)
+        SELECT #{histType}, user_id, user_pwd, #{regId}, #{regNm}, #{regIp}, GETDATE()
+        FROM TB_USER_INFO WHERE user_id = #{userId}
+    </insert>
 
 </mapper>

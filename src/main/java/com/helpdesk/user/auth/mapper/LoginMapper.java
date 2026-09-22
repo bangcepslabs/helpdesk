@@ -26,4 +26,5 @@ public interface LoginMapper {
 
     /** 비밀번호 변경 */
     int updateUserPwd(Map<String, Object> param);
+    int insertPasswordHistory(Map<String, Object> param);
 }

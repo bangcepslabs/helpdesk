@@ -2,6 +2,7 @@ package com.helpdesk.common.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 
 public class PasswordUtil {
 
@@ -11,7 +12,7 @@ public class PasswordUtil {
     public static String encrypt(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(password.getBytes());
+            md.update(password.getBytes(StandardCharsets.UTF_8));
             byte[] bytes = md.digest();
             StringBuilder sb = new StringBuilder();
             for (byte b : bytes) {

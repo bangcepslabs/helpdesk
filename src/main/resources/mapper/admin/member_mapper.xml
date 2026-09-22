@@ -134,10 +134,16 @@
     </update>
 
     <!-- 비밀번호 초기화 -->
-    <update id="updateMemberPwd" parameterType="map">
+      <update id="updateMemberPwd" parameterType="map">
         UPDATE TB_USER_INFO SET user_pwd = #{userPwd}
         WHERE user_id = #{userId}
-    </update>
+      </update>
+
+      <insert id="insertPasswordHistory" parameterType="map">
+          INSERT INTO TB_USER_PWD_HIST (hist_type, user_id, prev_pwd, reg_id, reg_nm, reg_ip, reg_dt)
+          SELECT #{histType}, user_id, user_pwd, #{regId}, #{regNm}, #{regIp}, GETDATE()
+          FROM TB_USER_INFO WHERE user_id = #{userId}
+      </insert>
 
     <!-- 사용자 삭제 -->
     <delete id="deleteMemberInfo" parameterType="map">

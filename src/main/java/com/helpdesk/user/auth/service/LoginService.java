@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LoginService {
@@ -76,10 +77,15 @@ public class LoginService {
     /**
      * 비밀번호 변경
      */
+    @Transactional
     public int changePassword(String userId, String newRawPwd) {
         Map<String, Object> param = new HashMap<>();
         param.put("userId", userId);
         param.put("newPwd", PasswordUtil.encrypt(newRawPwd));
+        param.put("histType", "USER");
+        param.put("regId", userId);
+        param.put("regNm", userId);
+        loginMapper.insertPasswordHistory(param);
         return loginMapper.updateUserPwd(param);
     }
 

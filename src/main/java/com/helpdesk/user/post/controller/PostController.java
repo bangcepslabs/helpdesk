@@ -426,13 +426,23 @@ public class PostController {
 
     /** 파일 다운로드 */
     @GetMapping("/file/download")
-    public ResponseEntity<Resource> downloadFile(@RequestParam int fileSeq) throws UnsupportedEncodingException {
+    public ResponseEntity<Resource> downloadFile(@RequestParam int fileSeq,
+                                                 HttpServletRequest request) throws UnsupportedEncodingException {
+        Map<String, Object> loginUser = SessionUtil.getLoginUser(request);
+        if (loginUser == null) return ResponseEntity.status(401).build();
         
         Map<String, Object> fileInfo = postService.getFileInfo(fileSeq);
         
         if (fileInfo == null) {
             return ResponseEntity.notFound().build();
         }
+
+        String ownerId = fileInfo.get("reg_id") != null ? String.valueOf(fileInfo.get("reg_id")) : null;
+        boolean isAdmin = isAdmin(loginUser);
+        boolean isOwner = ownerId != null && ownerId.equals(SessionUtil.getLoginUserId(request));
+        boolean isSecret = "Y".equals(String.valueOf(fileInfo.get("secret_yn")));
+        if (isSecret && !isAdmin && !isOwner) return ResponseEntity.status(403).build();
+        if (!"Y".equals(String.valueOf(fileInfo.get("post_use_yn")))) return ResponseEntity.notFound().build();
         
         // 다운로드 수 증가
         postService.increaseDownloadCount(fileSeq);

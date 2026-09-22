@@ -15,6 +15,7 @@ public interface MemberMapper {
     int updateMemberInfo(Map<String, Object> param);
     int updateMemberApproval(Map<String, Object> param);
     int updateMemberPwd(Map<String, Object> param);
+    int insertPasswordHistory(Map<String, Object> param);
     int deleteMemberInfo(Map<String, Object> param);
     int deleteMemberTypeInfo(Map<String, Object> param);
 
