@@ -319,8 +319,18 @@
         }
 
         function showGrantModal() {
-            // TODO: 권한 부여 모달 구현
-            alert('권한 부여 기능은 추후 구현 예정입니다.');
+            const userId = prompt('권한을 부여할 사용자 ID를 입력하세요.');
+            if (userId === null) return;
+            const value = userId.trim();
+            if (!value) { alert('사용자 ID를 입력하세요.'); return; }
+            fetch('${pageContext.request.contextPath}/admin/role/grant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ userId: value, roleCode: '${roleInfo.role_code}' }).toString()
+            }).then(response => response.json()).then(data => {
+                if (data.success) { alert('권한이 부여되었습니다.'); location.reload(); }
+                else alert(data.message || '권한 부여 중 오류가 발생했습니다.');
+            }).catch(() => alert('권한 부여 중 오류가 발생했습니다.'));
         }
     </script>
 </body>

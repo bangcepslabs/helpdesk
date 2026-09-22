@@ -11,7 +11,7 @@
             R.role_code,
             R.role_nm,
             R.sys_id,
-            (SELECT COUNT(*) FROM TB_USER_ROLE_MAP WHERE role_code = R.role_code) AS user_cnt,
+            (SELECT COUNT(*) FROM TB_USER_ROLE_MAP M WHERE M.role_code = R.role_code AND M.sys_id = R.sys_id) AS user_cnt,
             ROW_NUMBER() OVER(ORDER BY R.role_code) AS rsn
         FROM TB_ROLE_INFO R
         WHERE R.sys_id = #{sysId}
@@ -39,7 +39,12 @@
 
     <!-- 권한 상세 조회 -->
     <select id="selectRoleInfo" parameterType="map" resultType="map">
-        SELECT * FROM TB_ROLE_INFO WHERE role_code = #{roleCode}
+        SELECT * FROM TB_ROLE_INFO WHERE role_seq = #{roleSeq} AND sys_id = #{sysId}
+    </select>
+
+    <select id="checkRoleNameDup" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM TB_ROLE_INFO
+        WHERE sys_id = #{sysId} AND role_nm = #{roleNm}
     </select>
 
     <!-- 권한 등록 -->
@@ -55,12 +60,12 @@
     <update id="updateRoleInfo" parameterType="map">
         UPDATE TB_ROLE_INFO SET
             role_nm = #{roleNm}
-        WHERE role_code = #{roleCode}
+        WHERE role_seq = #{roleSeq}
     </update>
 
     <!-- 권한 삭제 -->
     <delete id="deleteRoleInfo" parameterType="map">
-        DELETE FROM TB_ROLE_INFO WHERE role_code = #{roleCode}
+        DELETE FROM TB_ROLE_INFO WHERE role_seq = #{roleSeq} AND sys_id = #{sysId}
     </delete>
 
     <!-- 사용자 권한 목록 -->
@@ -76,17 +81,32 @@
         FROM TB_USER_ROLE_MAP URM
         JOIN TB_USER_INFO U ON URM.user_id = U.user_id
         JOIN TB_ROLE_INFO R ON URM.role_code = R.role_code
-        WHERE URM.role_code = #{roleCode}
+        WHERE URM.role_code = #{roleCode} AND URM.sys_id = #{sysId}
         ORDER BY U.user_nm
+    </select>
+
+    <select id="selectGrantableUserList" parameterType="map" resultType="map">
+        SELECT U.user_id, U.user_nm, U.email, U.dept_nm
+        FROM TB_USER_INFO U
+        WHERE NOT EXISTS (
+              SELECT 1 FROM TB_USER_ROLE_MAP M
+              WHERE M.user_id = U.user_id AND M.role_code = #{roleCode} AND M.sys_id = #{sysId}
+          )
+        ORDER BY U.user_nm, U.user_id
     </select>
 
     <!-- 사용자 권한 등록 -->
     <insert id="insertUserRoleMap" parameterType="map">
         INSERT INTO TB_USER_ROLE_MAP (
             user_id, role_code, sys_id
-        ) VALUES (
-            #{userId}, #{roleCode}, #{sysId}
         )
+        SELECT #{userId}, #{roleCode}, #{sysId}
+        WHERE EXISTS (SELECT 1 FROM TB_USER_INFO WHERE user_id = #{userId})
+          AND EXISTS (SELECT 1 FROM TB_ROLE_INFO WHERE role_code = #{roleCode} AND sys_id = #{sysId})
+          AND NOT EXISTS (
+              SELECT 1 FROM TB_USER_ROLE_MAP
+              WHERE user_id = #{userId} AND role_code = #{roleCode} AND sys_id = #{sysId}
+          )
     </insert>
 
     <!-- 사용자 권한 삭제 -->
@@ -94,6 +114,32 @@
         DELETE FROM TB_USER_ROLE_MAP
         WHERE user_id = #{userId} AND role_code = #{roleCode}
     </delete>
+
+    <delete id="deleteUserRoleMapByRoleCode" parameterType="map">
+        DELETE FROM TB_USER_ROLE_MAP WHERE role_code = #{roleCode} AND sys_id = #{sysId}
+    </delete>
+
+    <delete id="deleteGroupRoleMapByRoleCode" parameterType="map">
+        DELETE FROM TB_GROUP_ROLE_MAP WHERE role_code = #{roleCode} AND sys_id = #{sysId}
+    </delete>
+
+    <select id="selectUserListByRole" parameterType="map" resultType="map">
+        SELECT X.* FROM (
+            SELECT URM.user_role_seq, URM.user_id, URM.role_code, URM.sys_id,
+                   U.user_nm, U.email, U.dept_nm,
+                   ROW_NUMBER() OVER (ORDER BY U.user_nm, U.user_id) AS rsn
+            FROM TB_USER_ROLE_MAP URM
+            JOIN TB_USER_INFO U ON URM.user_id = U.user_id
+            WHERE URM.role_code = #{roleCode}
+              AND URM.sys_id = #{sysId}
+        ) X
+        WHERE X.rsn &gt; #{minSn} AND X.rsn &lt;= #{maxSn}
+    </select>
+
+    <select id="selectUserListByRoleCount" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM TB_USER_ROLE_MAP
+        WHERE role_code = #{roleCode} AND sys_id = #{sysId}
+    </select>
 
     <!-- 그룹 권한 목록 -->
     <select id="selectGroupRoleList" parameterType="map" resultType="map">

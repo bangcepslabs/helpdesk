@@ -90,6 +90,8 @@
             domain_seq,
             sys_id,
             sys_domain,
+            sys_domain AS domain_nm,
+            sys_domain AS domain_url,
             use_yn
         FROM TB_SYS_DOMAIN_INFO
         WHERE sys_id = #{sysId}

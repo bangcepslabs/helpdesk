@@ -234,7 +234,7 @@
                         <c:otherwise>
                             <c:forEach items="${noticeList}" var="notice" begin="0" end="4">
                                 <li>
-                                    <a href="${pageContext.request.contextPath}/user/post/view?postSeq=${notice.post_seq}">
+                                    <a href="${pageContext.request.contextPath}/user/post/view?boardId=${notice.board_id}&postSeq=${notice.post_seq}">
                                         <span class="notice-title">
                                             ${notice.post_title}
                                             <c:if test="${notice.is_new eq 'Y'}">
@@ -272,7 +272,7 @@
                 </c:forEach>
                 
                 <!-- 고정 메뉴 -->
-                <a href="${pageContext.request.contextPath}/user/post/list?searchOnlyMine=Y" class="menu-item">
+                <a href="${pageContext.request.contextPath}/user/post/list?boardId=${not empty boardList ? boardList[0].board_id : 0}&searchOnlyMine=Y" class="menu-item">
                     <i>📋</i>
                     <span>내 문의</span>
                 </a>

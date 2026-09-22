@@ -54,10 +54,11 @@ public class RoleService {
     }
 
     @Transactional
-    public void deleteRole(int roleSeq, int roleCode) {
+    public void deleteRole(int roleSeq, int roleCode, String sysId) {
         Map<String, Object> param = new HashMap<>();
         param.put("roleSeq", roleSeq);
         param.put("roleCode", roleCode);
+        param.put("sysId", sysId);
         roleMapper.deleteUserRoleMapByRoleCode(param);
         roleMapper.deleteGroupRoleMapByRoleCode(param);
         roleMapper.deleteRoleInfo(param);

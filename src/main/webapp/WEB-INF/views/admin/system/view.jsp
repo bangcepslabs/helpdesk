@@ -319,7 +319,7 @@
                                     <td><fmt:formatDate value="${domain.reg_dt}" pattern="yyyy-MM-dd"/></td>
                                     <td>
                                         <button type="button" class="btn btn-primary btn-sm" 
-                                                onclick="editDomain('${domain.domain_seq}', '${domain.domain_nm}', '${domain.domain_url}', '${domain.domain_port}', '${domain.ssl_yn}', '${domain.use_yn}', '${domain.domain_desc}')">
+                                                onclick="editDomain('${domain.domain_seq}', '${domain.sys_domain}')">
                                             수정
                                         </button>
                                         <button type="button" class="btn btn-danger btn-sm" 
@@ -363,13 +363,31 @@
         }
 
         function showDomainModal() {
-            // TODO: 도메인 추가 모달 구현
-            alert('도메인 추가 기능은 추후 구현 예정입니다.');
+            const domain = prompt('등록할 도메인 URL을 입력하세요.\n예: https://helpdesk.example.com');
+            if (domain === null) return;
+            const value = domain.trim();
+            if (!value) { alert('도메인 URL을 입력하세요.'); return; }
+            submitDomain('insert', { sysId: '${systemInfo.sys_id}', sysDomain: value });
         }
 
-        function editDomain(domainSeq, domainNm, domainUrl, domainPort, sslYn, useYn, domainDesc) {
-            // TODO: 도메인 수정 모달 구현
-            alert('도메인 수정 기능은 추후 구현 예정입니다.');
+        function editDomain(domainSeq, currentDomain) {
+            const domain = prompt('수정할 도메인 URL을 입력하세요.', currentDomain || '');
+            if (domain === null) return;
+            const value = domain.trim();
+            if (!value) { alert('도메인 URL을 입력하세요.'); return; }
+            submitDomain('update', { domainSeq: domainSeq, sysDomain: value });
+        }
+
+        function submitDomain(action, data) {
+            const body = new URLSearchParams(data);
+            fetch('${pageContext.request.contextPath}/admin/system/domain/' + action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString()
+            }).then(response => response.json()).then(result => {
+                if (result.success) location.reload();
+                else alert(result.message || '도메인 처리 중 오류가 발생했습니다.');
+            }).catch(() => alert('도메인 처리 중 오류가 발생했습니다.'));
         }
 
         function deleteDomain(domainSeq, domainNm) {

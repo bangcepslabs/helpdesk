@@ -149,11 +149,17 @@
     <script>
         // 권한코드 중복 체크 (등록시에만)
         <c:if test="${empty roleInfo}">
-        document.getElementById('roleCode').addEventListener('blur', function() {
-            const roleCode = this.value;
-            if (roleCode) {
-                // TODO: Ajax로 중복 체크 구현
-                console.log('권한코드 중복 체크:', roleCode);
+        document.getElementById('roleNm').addEventListener('blur', function() {
+            const roleNm = this.value.trim();
+            if (roleNm) {
+                fetch('${pageContext.request.contextPath}/admin/role/checkName?roleNm=' + encodeURIComponent(document.getElementById('roleNm').value))
+                    .then(response => response.json())
+                    .then(duplicated => {
+                        if (duplicated) {
+                            alert('이미 사용 중인 권한명입니다.');
+                            document.getElementById('roleNm').focus();
+                        }
+                    });
             }
         });
         </c:if>

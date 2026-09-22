@@ -79,6 +79,13 @@ public class RoleController {
         return "redirect:/admin/role/list";
     }
 
+    /** 권한명 중복 확인 (Ajax) */
+    @GetMapping("/checkName")
+    @ResponseBody
+    public boolean checkName(@RequestParam String roleNm, HttpServletRequest request) {
+        return roleService.checkRoleNameDup(roleNm.trim(), SessionUtil.getLoginSysId(request));
+    }
+
     /** 권한 수정 처리 */
     @PostMapping("/update")
     public String update(@RequestParam Map<String, Object> param) {
@@ -89,8 +96,9 @@ public class RoleController {
     /** 권한 삭제 (Ajax) */
     @PostMapping("/delete")
     @ResponseBody
-    public Map<String, Object> delete(@RequestParam int roleSeq, @RequestParam int roleCode) {
-        roleService.deleteRole(roleSeq, roleCode);
+    public Map<String, Object> delete(@RequestParam int roleSeq, @RequestParam int roleCode,
+                                      HttpServletRequest request) {
+        roleService.deleteRole(roleSeq, roleCode, SessionUtil.getLoginSysId(request));
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         return result;

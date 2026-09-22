@@ -33,6 +33,7 @@
     <select id="selectNoticeList" resultType="map">
         SELECT TOP 5
             P.post_seq,
+            P.board_id,
             P.post_title,
             P.reg_dt,
             CASE 
