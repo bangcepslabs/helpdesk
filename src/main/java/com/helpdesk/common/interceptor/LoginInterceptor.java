@@ -27,8 +27,15 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         // 관리자 경로 접근 권한 체크
         if (requestUri(request).startsWith("/admin/")) {
-            String roleCode = (String) loginUser.get("roleCode");
-            if (roleCode == null || Integer.parseInt(roleCode) > 2) {
+            Object roleCode = loginUser.get("roleCode");
+            if (roleCode == null) roleCode = loginUser.get("role_code");
+            int role = 999;
+            try {
+                if (roleCode != null) role = Integer.parseInt(String.valueOf(roleCode));
+            } catch (NumberFormatException ignored) {
+                role = 999;
+            }
+            if (role > 2) {
                 response.sendRedirect(request.getContextPath() + "/error/403");
                 return false;
             }

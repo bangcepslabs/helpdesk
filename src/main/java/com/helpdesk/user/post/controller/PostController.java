@@ -337,6 +337,11 @@ public class PostController {
             result.put("message", "관리자만 상태를 변경할 수 있습니다.");
             return result;
         }
+        if (!java.util.Arrays.asList("W", "R", "P", "C", "H").contains(postStatus)) {
+            result.put("success", false);
+            result.put("message", "허용되지 않는 상태값입니다.");
+            return result;
+        }
         if (postService.getPostInfo(boardId, postSeq) == null) {
             result.put("success", false);
             result.put("message", "존재하지 않는 게시글입니다.");

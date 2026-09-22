@@ -81,7 +81,10 @@ public class LoginController {
 
     /** 비밀번호 변경 페이지 */
     @GetMapping("/change-password")
-    public String changePwdPage() {
+    public String changePwdPage(HttpServletRequest request) {
+        if (!SessionUtil.isLoggedIn(request)) {
+            return "redirect:/auth/login";
+        }
         return "common/change_password";
     }
 
@@ -92,6 +95,10 @@ public class LoginController {
             @RequestParam String confirmPwd,
             HttpServletRequest request,
             Model model) {
+
+        if (!SessionUtil.isLoggedIn(request)) {
+            return "redirect:/auth/login";
+        }
 
         if (!newPwd.equals(confirmPwd)) {
             model.addAttribute("errorMsg", "새 비밀번호가 일치하지 않습니다.");
